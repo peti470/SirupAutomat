@@ -1,0 +1,18 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="EStatus" Id="{4a12072d-8be6-4bb2-9c5a-12e69b424b19}">
+    <Declaration><![CDATA[TYPE EStatus :
+(
+	NotReady,
+	Ready,
+	Prefilling,
+	DeliverLiquid,
+	Error,
+	PreparingForNextDrink,
+	MeasuringContent,
+	RunningManualDeliver
+);
+END_TYPE
+]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,20 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <GVL Name="Global_Variables" Id="{eaca8c2d-7c95-4269-9900-8fa51fe9a2ab}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+	PLCPRJ_MAX_CONNECTIONS						: UDINT 	:= 5;(* Max. number of server<->client connections *)
+	PLCPRJ_SERVER_RESPONSE_TIMEOUT			: TIME 	:= T#10s;
+	PLCPRJ_CLIENT_SEND_CYCLE_TIME				: TIME 	:= T#1s;
+
+	PLCPRJ_RECEIVER_POLLING_CYCLE_TIME			: TIME 	:= T#200ms;
+	PLCPRJ_BUFFER_SIZE							: UDINT 	:= 10000;(* Max. internal fifo/receiver buffer size *)
+
+	(* Some project specific error codes *)
+	PLCPRJ_ERROR_RECEIVE_BUFFER_OVERFLOW	: UDINT := 16#8101; (* receive fifo/buffer overflow*)
+	PLCPRJ_ERROR_SEND_BUFFER_OVERFLOW		: UDINT := 16#8102;(* send fifo/buffer overflow *)
+	PLCPRJ_ERROR_RESPONSE_TIMEOUT			: UDINT := 16#8103;(* receive timeout error *)
+	PLCPRJ_ERROR_INVALID_FRAME_FORMAT		: UDINT := 16#8104;(* invalid frame format/data *)
+END_VAR
+]]></Declaration>
+    <ObjectProperties />
+  </GVL>
+</TcPlcObject>

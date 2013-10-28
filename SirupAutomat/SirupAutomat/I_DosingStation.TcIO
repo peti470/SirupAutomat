@@ -1,0 +1,37 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <Itf Name="I_DosingStation" Id="{dd060b09-3453-43be-b3ab-68abc43b4bb7}">
+    <Declaration><![CDATA[INTERFACE I_DosingStation
+]]></Declaration>
+    <Method Name="M_Fill" Id="{18e66088-5ba2-4661-9ade-7b93f6d94a15}">
+      <Declaration><![CDATA[METHOD M_Fill
+VAR_INPUT
+	tiPumpTime : TIME;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_Prefill" Id="{cb59727f-804f-4613-9c7a-3c15763494ee}">
+      <Declaration><![CDATA[METHOD M_Prefill
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_Stop" Id="{fb16cb37-3fa6-4dc4-bfbf-8d0b5b4f920b}">
+      <Declaration><![CDATA[METHOD M_Stop
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_PrepareForNextDrink" Id="{16fba1dc-d2f7-4a9f-99f5-846990580c4a}">
+      <Declaration><![CDATA[METHOD M_PrepareForNextDrink
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_GetContent_ml" Id="{eb97d22e-3772-4802-b352-0f9c6306545c}">
+      <Declaration><![CDATA[METHOD M_GetContent_ml : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

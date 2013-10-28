@@ -1,0 +1,65 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="FB_FrameBinaryFifo" Id="{4e623c8d-b1be-4cb4-93b5-f5c355fc86d4}">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_FrameBinaryFifo
+(* Tx/Rx (binary data) fifo control function block *)
+VAR_INPUT
+	sDesc		: STRING(20)	:= 'Unknown';(* Debug message description string (allows the identification of log message source) *)
+	bDbg		: BOOL 		:= FALSE; (* TRUE => Enable debug output, FALSE => Disable *)
+	pPut			: DWORD 	:= 0;(* Address/pointer to the source data  *)
+	cbPut		: UDINT(0..PLCPRJ_BUFFER_SIZE) := 0;(* Byte size of the source data *)
+	pGet		: DWORD 	:= 0;(* Address/pointer to the destination buffer *)
+	cbGet		: UDINT(0..PLCPRJ_BUFFER_SIZE) := 0;(* Max. byte size of the destination buffer *)
+END_VAR
+VAR_OUTPUT
+	bOk			: BOOL; 	 (* TRUE = New entry added or removed succesfully, FALSE = Fifo overflow or fifo empty *)
+	cbReturn		: UDINT 	:= 0; (* Number of get/removed data bytes *)
+	nCount		: UDINT	:= 0;	(* Number of fifo entries *)
+	cbFree		: UDINT	:= 0;	(* Free buffer space *)
+END_VAR
+VAR
+	buffer		: ARRAY[-3..PLCPRJ_BUFFER_SIZE] OF BYTE;(* Internal buffer memory *)
+	fbBuffer 		: FB_MemRingBuffer;(* Basic (lower level) buffer control function block *)
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[;]]></ST>
+    </Implementation>
+    <Action Name="A_AddTail" Id="{3bc47d3e-15b4-4f15-bfac-dabc071b33f2}">
+      <Implementation>
+        <ST><![CDATA[(* adds new fifo entry *)
+fbBuffer.A_AddTail(  	pWrite := pPut, cbWrite := cbPut,
+					pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
+					bOk=>bOk, nCount=>nCount );
+IF bOk THEN
+	cbFree := PLCPRJ_BUFFER_SIZE - fbBuffer.cbSize;(* calculate the free buffer space *)
+	IF bDbg THEN(* log message *)
+		F_ADSLOGHEXDATA( CONCAT( sDesc, '<=' ), pPut, cbPut );
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_RemoveHead" Id="{5fbb866b-a35a-4e1c-9e80-f54b3361500d}">
+      <Implementation>
+        <ST><![CDATA[(* removes oldest fifo entry *)
+fbBuffer.A_RemoveHead( 	pRead := pGet, cbRead := cbGet,
+						pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
+						bOk=>bOk, nCount=>nCount, cbReturn=>cbReturn );
+IF bOk THEN
+	cbFree := PLCPRJ_BUFFER_SIZE - fbBuffer.cbSize;(* calculate the free buffer space *)
+	IF bDbg THEN(* log message *)
+		F_ADSLOGHEXDATA( CONCAT( sDesc, '=>' ), pGet, cbReturn );
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Reset" Id="{2f42bf03-d093-4a89-b013-404956092aac}">
+      <Implementation>
+        <ST><![CDATA[(* resets fifo = clears all data *)
+fbBuffer.A_Reset( 	pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
+				bOk=>bOk, nCount=>nCount, cbReturn =>cbReturn );
+
+cbFree := PLCPRJ_BUFFER_SIZE;]]></ST>
+      </Implementation>
+    </Action>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

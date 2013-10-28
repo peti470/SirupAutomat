@@ -1,0 +1,16 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="SCODE_CODE" Id="{22f2198f-6d3d-4db8-96d9-e383780179d6}">
+    <Declaration><![CDATA[FUNCTION SCODE_CODE : DWORD
+(* Helper function: returns the lower word of error code *)
+VAR_INPUT
+	sc		: DWORD;
+END_VAR
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SCODE_CODE := 16#FFFF AND sc;]]></ST>
+    </Implementation>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

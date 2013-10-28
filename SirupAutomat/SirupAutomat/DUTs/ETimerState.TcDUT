@@ -1,0 +1,14 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="ETimerState" Id="{f2047c62-1c71-4bd1-aaaa-7c6743b9b547}">
+    <Declaration><![CDATA[TYPE ETimerState :
+(
+	created := 0,
+	started := 1,
+	outputHigh := 2,
+	outputLow := 3
+);
+END_TYPE
+]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

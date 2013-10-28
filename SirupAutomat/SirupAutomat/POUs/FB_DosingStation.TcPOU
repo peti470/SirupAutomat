@@ -1,0 +1,64 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="FB_DosingStation" Id="{cf9a9aeb-c5e4-422a-ac3b-1a9f74c0da46}">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_DosingStation IMPLEMENTS I_DosingStation
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="M_Fill" Id="{d58b1e4b-d9da-4bc5-8cb0-111dc14a6664}">
+      <Declaration><![CDATA[METHOD M_Fill
+VAR_INPUT
+	tiPumpTime : TIME;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Prefill" Id="{00c12d6b-5192-4cc3-80b2-3da85684c7f9}">
+      <Declaration><![CDATA[METHOD M_Prefill
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Stop" Id="{eb2a95e7-c832-4ae5-a7c0-1d3e8c7449ac}">
+      <Declaration><![CDATA[METHOD M_Stop
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PrepareForNextDrink" Id="{99141a7d-eab9-4693-89fd-da4527739973}">
+      <Declaration><![CDATA[METHOD M_PrepareForNextDrink
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetContent_ml" Id="{a5e122e1-7dba-48e3-ab58-965c43118a54}">
+      <Declaration><![CDATA[METHOD M_GetContent_ml : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[;]]></ST>
+      </Implementation>
+    </Method>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

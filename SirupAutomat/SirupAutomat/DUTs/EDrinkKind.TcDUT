@@ -1,0 +1,15 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="EDrinkKind" Id="{14cd50c0-b24a-4fd5-961e-cc209ce34a38}">
+    <Declaration><![CDATA[TYPE EDrinkKind :
+(
+	eSirup,
+    eCampariSoda,
+	eStation1,
+	eStation2,
+	eStation3
+);
+END_TYPE
+]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

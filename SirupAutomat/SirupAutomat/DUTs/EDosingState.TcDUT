@@ -1,0 +1,20 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="EDosingState" Id="{0565c16c-0dcf-4b2b-8cbf-856eac87a3e8}">
+    <Declaration><![CDATA[TYPE EDosingState :
+(
+	eStopped,
+	eV1Opened,
+    eV1AndV3Opened,
+	eV1AndV2AndV3Closed,
+	eV2Opened,
+    eV3Opened,
+	eP1Started,
+	eP1Stopped,
+	eV1Stopped,
+	eEnd
+);
+END_TYPE
+]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

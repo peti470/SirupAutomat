@@ -1,0 +1,10 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <GVL Name="DosingOuput" Id="{4f1e1718-6b6c-4f80-a507-26433f0b93e6}">
+    <Declaration><![CDATA[VAR_GLOBAL
+    bPump AT %Q* : BOOL;
+    bBlowOff AT %Q* : BOOL;
+	iPressure AT %I* : INT;
+END_VAR]]></Declaration>
+    <ObjectProperties />
+  </GVL>
+</TcPlcObject>

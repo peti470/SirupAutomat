@@ -1,0 +1,13 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="ESystemState" Id="{2ee7c2b7-4230-46f6-98be-92070969ae54}">
+    <Declaration><![CDATA[TYPE ESystemState :
+(
+	eStandby,
+	eMixing,
+	ePrefilling
+);
+END_TYPE
+]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

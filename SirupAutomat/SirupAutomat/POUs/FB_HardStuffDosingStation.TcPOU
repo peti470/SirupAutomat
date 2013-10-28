@@ -1,0 +1,216 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="FB_HardStuffDosingStation" Id="{387c0b63-cbe2-47e0-91d4-766e2eccec12}">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_HardStuffDosingStation EXTENDS FB_DosingStation
+VAR_INPUT
+	bPrefill AT %I* : BOOL;
+END_VAR
+VAR_OUTPUT
+	bFinished : BOOL := TRUE;
+	error : BOOL := FALSE;
+END_VAR
+VAR
+	fbT1 : FB_Timer;
+	dosingState : EDosingState := eStopped;
+	fbValve1 : FB_DigitalOut;
+	fbValve2 : FB_DigitalOut;
+	
+	iStartPressure : INT;
+	iActualPressure : INT;
+	iDeltaPressure : INT;
+	iContentMeasurementTimeout : TIME := TIME#5S;
+END_VAR
+VAR_EXTERNAL
+    bPump : BOOL;
+END_VAR
+ 
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[;]]></ST>
+    </Implementation>
+    <Method Name="M_Fill" Id="{3aea9c12-8e3f-4165-84f2-04a81cf665cc}">
+      <Declaration><![CDATA[METHOD M_Fill
+VAR_INPUT
+	    tiPumpTime : TIME := TIME#2S;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE dosingState OF
+	eStopped :
+		// wait for start
+   		bFinished := FALSE;
+        fbValve2.M_On();
+        dosingState := eV2Opened;
+	eV2Opened :
+		fbT1.M_Start(TIME#1S);
+		IF fbT1.bTimeout THEN
+			fbValve1.M_On();
+			dosingState := eV1Opened;
+		END_IF
+	eV1Opened :
+		fbT1.M_Start(TIME#1S);
+		IF fbT1.bTimeout THEN
+			bPump := TRUE;
+			dosingState := eP1Started;
+		END_IF
+	eP1Started :
+		fbT1.M_Start(tiPumpTime);
+		IF fbT1.bTimeout THEN
+			bPump := FALSE;
+			dosingState := eP1Stopped;
+		END_IF
+	eP1Stopped :
+		fbT1.M_Start(TIME#1S);
+		IF fbT1.bTimeout THEN
+			fbValve1.M_Off();
+			dosingState := eV1Stopped;
+		END_IF
+	eV1Stopped :
+		fbT1.M_Start(TIME#10S);
+		IF fbT1.bTimeout THEN
+			fbValve2.M_Off();
+			dosingState := eEnd;
+		END_IF
+	eEnd :
+   		bFinished := TRUE;
+		dosingState := eStopped;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Prefill" Id="{4e811753-4761-4d5c-b274-32bfc8510eee}">
+      <Declaration><![CDATA[METHOD M_Prefill
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE dosingState OF
+	eStopped :
+		// wait for start
+   		bFinished := FALSE;
+        fbValve2.M_On();
+        dosingState := eV2Opened;
+	eV2Opened :
+		fbT1.M_Start(TIME#0S);
+		IF fbT1.bTimeout THEN
+			fbValve1.M_On();
+			dosingState := eV1Opened;
+		END_IF
+	eV1Opened :
+		fbT1.M_Start(TIME#0S);
+		IF fbT1.bTimeout THEN
+			bPump := TRUE;
+			dosingState := eP1Started;
+		END_IF
+	eP1Started :
+		IF NOT bPrefill THEN
+			bPump := FALSE;
+			dosingState := eP1Stopped;
+		END_IF
+	eP1Stopped :
+		fbT1.M_Start(TIME#1S);
+		IF fbT1.bTimeout THEN
+			fbValve1.M_Off();
+			dosingState := eV1Stopped;
+		END_IF
+	eV1Stopped :
+		fbT1.M_Start(TIME#5S);
+		IF fbT1.bTimeout THEN
+			fbValve2.M_Off();
+			dosingState := eEnd;
+		END_IF
+	eEnd :
+   		bFinished := TRUE;
+		dosingState := eStopped;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Stop" Id="{71312e74-88dd-41ef-8fe3-5a9e4fc1a837}">
+      <Declaration><![CDATA[METHOD M_Stop
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbValve2.M_Off();
+fbValve1.M_Off();
+bPump := FALSE;	
+dosingState := eStopped;
+bFinished := TRUE;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PrepareForNextDrink" Id="{9d9b7644-6880-425b-9989-0cd2ba2585a5}">
+      <Declaration><![CDATA[METHOD M_PrepareForNextDrink
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE dosingState OF
+	eStopped :
+		// wait for start
+		bFinished := FALSE;
+        fbValve2.M_On();
+        dosingState := eV2Opened;
+	eV2Opened :
+		fbT1.M_Start(TIME#10S);
+		IF fbT1.bTimeout THEN
+			fbValve2.M_Off();
+			dosingState := eEnd;
+		END_IF
+	eEnd :
+   		bFinished := TRUE;
+		dosingState := eStopped;		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetContent_ml" Id="{da65f851-ae3a-4c1b-8f58-9b6e6d870295}">
+      <Declaration><![CDATA[METHOD M_GetContent_ml : BOOL
+VAR_INPUT
+END_VAR
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE dosingState OF
+	eStopped :
+		// wait for start
+   		bFinished := FALSE;
+        // open the 2 valves (the blow off valve is valve 3) to release overpressure of the CO2 bottle
+        bBlowOff := TRUE;
+        fbValve1.M_On();
+        dosingState := eV1AndV3Opened;
+    eV1AndV3Opened :    
+		fbT1.M_Start(TIME#2S);
+		IF fbT1.bTimeout THEN
+            // after a timeout close the blow off valve and the inlet
+			bBlowOff := FALSE;
+			fbValve1.M_Off();
+			iStartPressure := iPressure;
+			bPump := TRUE;
+			dosingState := eV1AndV2AndV3Closed;
+		END_IF
+	eV1AndV2AndV3Closed :
+		// now everything is closed, pump it up
+		fbT1.M_Start(iContentMeasurementTimeout);
+		IF fbT1.bTimeout THEN
+			iActualPressure := iPressure;
+			bPump := FALSE;
+			// let the pressure escape
+			bBlowOff := TRUE;
+			dosingState := eV3Opened;
+		END_IF
+	eV3Opened :
+		fbT1.M_Start(TIME#1S);
+		IF fbT1.bTimeout THEN
+			iDeltaPressure := iActualPressure - iStartPressure;
+			bBlowOff := FALSE;
+			dosingState := eEnd;
+		END_IF
+	eEnd :
+   		bFinished := TRUE;
+		dosingState := eStopped;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

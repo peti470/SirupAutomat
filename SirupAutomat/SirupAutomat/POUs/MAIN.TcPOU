@@ -1,0 +1,279 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="MAIN" Id="{13477b76-5766-4826-9abf-41e83b0057de}">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	iStationIndex : UINT := 0;
+	bGlassPresent AT %I* : BOOL;
+	bManualStart AT %I* : BOOL;
+	// systemState : ESystemState := eStandby;
+    
+	fbDosingStation1 : FB_HardStuffDosingStation;
+	fbDosingStation2 : FB_HardStuffDosingStation;
+    fbDosingStation3 : FB_CO2_DosingStation;
+	DeliveryLiquid: INT;
+	duration : TIME;
+	
+	A_Prefilling: INT;
+	
+	sLocalHost	: STRING(15) 	:= '0.0.0.0';(* Server address *)
+	nLocalPort	: UDINT 		:= 200;(* Server port number *)
+	bEnable		: BOOL 		:= TRUE;(* TRUE => enable server data exchange, FALSE => disable *)
+	hServer		: T_HSERVER;(* Server connection handle *)
+	fbApplication	: FB_ServerApplication := ( bDbg:=FALSE );(* Application (connection) instances *)
+
+	fbCloseAll	: FB_SocketCloseAll;
+	bCloseAll	: BOOL := TRUE;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[A_RunIP();
+
+CASE Status OF
+	NotReady :
+		IF bGlassPresent = TRUE THEN
+			Status := Ready;
+		ELSE
+			// this works only, when no glass is present
+			IF Command = MeasureContent THEN
+				Status := MeasuringContent;
+				iStationIndex := StationID;
+				Command := None;
+			END_IF
+		END_IF
+		
+	Ready:
+		IF bGlassPresent = FALSE THEN
+			Status := NotReady;  
+		END_IF
+		
+		IF Command = Deliver THEN
+			Status := DeliverLiquid;
+			Command := None;
+		ELSIF Command = PrepareForNextDrink THEN
+			Status := PreparingForNextDrink;
+			Command := None;
+		ELSE
+			IF fbDosingStation1.bPrefill THEN 
+				iStationIndex := 1;
+				Status := Prefilling;
+			ELSIF fbDosingStation2.bPrefill THEN
+				iStationIndex := 2;
+				Status := Prefilling;
+			ELSIF fbDosingStation3.bPrefill THEN
+				iStationIndex := 3;
+				Status := Prefilling;
+			ELSIF bManualStart THEN
+				iStationIndex := 0;
+				Status := RunningManualDeliver;
+			END_IF	
+		END_IF
+	MeasuringContent:
+		A_MeasureContent();
+  
+	Prefilling:
+		A_Prefill();
+		
+	RunningManualDeliver:
+		A_MixACubaLibre();
+	
+	DeliverLiquid:
+		duration := INT_TO_TIME(UINT_TO_INT(Volume_ml) * 111);
+		CASE StationID OF
+			1:
+				IF bGlassPresent = FALSE THEN
+					fbDosingStation1.M_Stop();
+					Status := Error;
+				ELSE
+					fbDosingStation1.M_Fill(duration);
+					IF fbDosingStation1.bFinished THEN
+						Status := NotReady;
+					END_IF
+				END_IF
+		
+			2:
+				IF bGlassPresent = FALSE THEN
+					fbDosingStation2.M_Stop();
+					Status := Error;
+				ELSE
+					fbDosingStation2.M_Fill(duration);
+					IF fbDosingStation2.bFinished THEN
+						Status := NotReady;
+					END_IF
+				END_IF
+				
+			3:
+				IF bGlassPresent = FALSE THEN
+					fbDosingStation3.M_Stop();
+					Status := Error;
+				ELSE
+					fbDosingStation3.M_Fill(duration);
+					IF fbDosingStation3.bFinished THEN
+						Status := NotReady;
+					END_IF
+				END_IF		
+	
+		END_CASE
+
+	Error:
+		IF Command = ErrorAck THEN
+			Status := NotReady;
+		END_IF
+		
+	PreparingForNextDrink:
+		CASE StationID OF
+			1:
+				IF bGlassPresent = FALSE THEN
+					fbDosingStation1.M_Stop();
+					Status := Error;
+				ELSE
+					fbDosingStation1.M_PrepareForNextDrink();
+					IF fbDosingStation1.bFinished THEN
+						Status := NotReady;
+					END_IF
+				END_IF
+		
+			2:
+				IF bGlassPresent = FALSE THEN
+					fbDosingStation2.M_Stop();
+					Status := Error;
+				ELSE
+					fbDosingStation2.M_PrepareForNextDrink();
+					IF fbDosingStation2.bFinished THEN
+						Status := NotReady;
+					END_IF
+				END_IF
+				
+			3:
+				IF bGlassPresent = FALSE THEN
+					fbDosingStation3.M_Stop();
+					Status := Error;
+				ELSE
+					fbDosingStation3.M_PrepareForNextDrink();
+					IF fbDosingStation3.bFinished THEN
+						Status := NotReady;
+					END_IF
+				END_IF		
+	
+		END_CASE		
+		
+END_CASE
+
+]]></ST>
+    </Implementation>
+    <Action Name="A_Prefill" Id="{e6f1dc17-511c-4148-8323-202d0324e620}">
+      <Implementation>
+        <ST><![CDATA[IF iStationIndex = 1 THEN
+    fbDosingStation1.M_Prefill();
+    IF fbDosingStation1.bFinished THEN
+		iStationIndex := 0;
+		Status := NotReady;
+    END_IF
+ELSIF  iStationIndex = 2  THEN
+    fbDosingStation2.M_Prefill();
+    IF fbDosingStation2.bFinished THEN
+		iStationIndex := 0;
+		Status := NotReady;
+    END_IF
+ELSIF  iStationIndex = 3  THEN
+    fbDosingStation3.M_Prefill();
+    IF fbDosingStation3.bFinished THEN
+		iStationIndex := 0;
+		Status := NotReady;
+    END_IF
+END_IF
+	
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_RunIP" Id="{b557b837-9f29-4161-8de3-62168adb95a0}">
+      <Implementation>
+        <ST><![CDATA[IF bCloseAll THEN(*On PLC reset or program download close all old (opened) connections *)
+	bCloseAll := FALSE;
+
+	(* Initialize server handle *)
+	F_CreateServerHnd( 	sSrvNetID 	:= '',
+						sLocalHost 	:= sLocalHost,
+						nLocalPort	:= nLocalPort,
+						nMode 		:= CONNECT_MODE_ENABLEDBG,(* Enable debug messages *)
+						bEnable 		:= FALSE,(* TRUE = leave listener socket open, FALSE = close listener socket after last connection ist closed too *)
+						hServer 		:= hServer );
+
+
+	fbCloseAll( bExecute:= TRUE );
+ELSE
+	fbCloseAll( bExecute:= FALSE );
+END_IF
+
+
+IF NOT fbCloseAll.bBusy THEN
+	(* trigger the execution of every connection instance *)
+	fbApplication( hServer := hServer, bEnable := bEnable );
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_MeasureContent" Id="{683cc773-a109-43ef-9398-34ce807eac80}">
+      <Implementation>
+        <ST><![CDATA[IF iStationIndex = 1 THEN
+    fbDosingStation1.M_GetContent_ml();
+    IF fbDosingStation1.bFinished THEN
+		iStationIndex := 0;
+		Status := NotReady;
+    END_IF
+ELSIF  iStationIndex = 2  THEN
+    fbDosingStation2.M_GetContent_ml();
+    IF fbDosingStation2.bFinished THEN
+		iStationIndex := 0;
+		Status := NotReady;
+    END_IF
+ELSIF  iStationIndex = 3  THEN
+    fbDosingStation3.M_GetContent_ml();
+    IF fbDosingStation3.bFinished THEN
+		iStationIndex := 0;
+		Status := NotReady;
+    END_IF
+END_IF
+	
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_MixACubaLibre" Id="{c6e17d4f-221f-4186-aa88-941696d095b4}">
+      <Implementation>
+        <ST><![CDATA[IF iStationIndex = 0 THEN
+    iStationIndex := 3;
+END_IF
+
+IF iStationIndex = 1 THEN
+    // the Rum
+	fbDosingStation1.M_Fill(INT_TO_TIME(UINT_TO_INT(10) * 111));
+    IF fbDosingStation1.bFinished THEN
+        iStationIndex := 4;
+    END_IF
+END_IF
+
+IF iStationIndex = 2 THEN
+    // the Vodka is not used yet 
+	fbDosingStation2.M_Fill(TIME#16S);
+    IF fbDosingStation2.bFinished THEN
+        iStationIndex := 3;
+    END_IF
+END_IF
+
+IF iStationIndex = 3 THEN
+    // the CocaCola 
+	fbDosingStation3.M_Fill(INT_TO_TIME(UINT_TO_INT(200) * 111));
+    IF fbDosingStation3.bFinished THEN
+        iStationIndex := 1;
+    END_IF
+END_IF
+
+IF iStationIndex = 4 THEN
+    iStationIndex := 0;
+	Status := NotReady;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

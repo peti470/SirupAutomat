@@ -1,0 +1,13 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <GVL Name="Liquids" Id="{08b5317c-3192-4ae0-bb50-5927b61f79c6}">
+    <Declaration><![CDATA[VAR_GLOBAL
+	Status AT %Q* : EStatus := NotReady; (*~	(OPC : 1 : available for OPC-clients)	*)
+	Command AT %I* : ECommand := None; (*~	(OPC : 1 : available for OPC-clients)	*)
+	StationID  AT %I* : UINT := 0; (*~	(OPC : 1 : available for OPC-clients)	*)
+	Volume_ml  AT %I* : UINT := 0; (*~	(OPC : 1 : available for OPC-clients)	*)
+	ErrString  AT %Q* : STRING := ''; (*~	(OPC : 1 : available for OPC-clients)	*)
+	GlassPresent : BOOL := FALSE;
+END_VAR]]></Declaration>
+    <ObjectProperties />
+  </GVL>
+</TcPlcObject>

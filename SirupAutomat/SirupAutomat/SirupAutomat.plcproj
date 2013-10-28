@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{b12bdd9f-77aa-4072-a501-d63869dd37a6}</ProjectGuid>
+    <Name>SirupAutomat</Name>
+    <ProgramVersion>3.1.0.5</ProgramVersion>
+    <Application>{741b70e8-8456-4efe-9584-8157d9864e6c}</Application>
+    <TypeSystem>{198a71e2-1228-4735-a36a-a698c5ef5929}</TypeSystem>
+    <Implicit_Task_Info>{391235f5-c31c-4787-a68a-f49a37091cb6}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{7cb479d6-49a0-4447-947f-31601357cd2a}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{59171243-87ea-44e4-ae1a-f3c034f43d94}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{940d0c58-55f1-4280-b5ad-d1f957cfa503}</LibraryReferences>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DUTs\EKey.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\EMethod.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\EStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\ECommand.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\EDosingState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\ETimerState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\ST_ApplicationBinaryData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\ST_BinaryFrame.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\ST_BinaryHeader.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\DosingOuput.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\Global_Variables.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\IOStates.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\Liquids.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="I_DigitalOut.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="I_DosingStation.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PlcTask.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_HardStuffDosingStation.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_CO2_DosingStation.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_LocalServer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_Timer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_DigitalOut.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\IP_POUs\FB_FrameBinaryFifo.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\IP_POUs\FB_ProtErrorFifo.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\IP_POUs\FB_ServerApplication.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\IP_POUs\F_ADSLOGERROR.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\IP_POUs\F_ADSLOGHEXDATA.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\IP_POUs\SCODE_CODE.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\MAIN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_DosingStation.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Visualization Manager.TcVMO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="VISUs\HardStuff.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>Visualization Manager.TcVMO</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DUTs" />
+    <Folder Include="GVLs" />
+    <Folder Include="POUs\IP_POUs" />
+    <Folder Include="VISUs" />
+    <Folder Include="POUs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderReference Include="Tc2_Standard">
+      <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Standard</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_System">
+      <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_System</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Interfaces">
+      <DefaultResolution>Tc3_Interfaces, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Interfaces</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Module">
+      <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Module</Namespace>
+    </PlaceholderReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SirupAutomat.tmc">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <SubObject Include="FB_CO2_DosingStation.M_GetContent_ml" />
+    <SubObject Include="FB_CO2_DosingStation.M_PrepareForNextDrink" />
+    <SubObject Include="FB_CO2_DosingStation.M_Stop" />
+    <SubObject Include="FB_DosingStation_1.M_Fill" />
+    <SubObject Include="FB_HardStuffDosingStation.M_GetContent_ml" />
+    <SubObject Include="FB_HardStuffDosingStation.M_PrepareForNextDrink" />
+    <SubObject Include="FB_HardStuffDosingStation.M_Stop" />
+    <SubObject Include="FB_Pump.M_Start" />
+    <SubObject Include="MAIN.A_Fill1_1" />
+    <SubObject Include="MAIN.A_MixASirup_1" />
+    <SubObject Include="MAIN.A_MixASirup_1" />
+    <SubObject Include="MAIN.A_MixASirup_2" />
+    <SubObject Include="MAIN.A_MixASirup_3" />
+  </ItemGroup>
+  <ItemGroup>
+    <LibraryReference Include="Tc2_OpcUa,3.3.2.0,Beckhoff Automation GmbH">
+      <Namespace>Tc2_OpcUa</Namespace>
+    </LibraryReference>
+    <LibraryReference Include="Tc2_TcpIp,3.3.1.0,Beckhoff Automation GmbH">
+      <Namespace>Tc2_TcpIp</Namespace>
+    </LibraryReference>
+    <LibraryReference Include="Tc2_Utilities,3.3.5.0,Beckhoff Automation GmbH">
+      <Namespace>Tc2_Utilities</Namespace>
+    </LibraryReference>
+  </ItemGroup>
+  <ProjectExtensions />
+</Project>

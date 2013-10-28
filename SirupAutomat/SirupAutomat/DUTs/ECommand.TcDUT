@@ -1,0 +1,16 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="ECommand" Id="{993488ac-7162-4fc7-91db-0e49298c773c}">
+    <Declaration><![CDATA[TYPE ECommand :
+(
+	None := 0,
+	Deliver := 1,
+	ErrorAck := 2,
+	PrepareForNextDrink := 3,
+	MeasureContent := 4,
+	StartManualCycle
+);
+END_TYPE
+]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

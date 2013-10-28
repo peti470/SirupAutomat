@@ -1,0 +1,25 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="F_ADSLOGERROR" Id="{a71ffdef-8973-4408-87af-75e7bec8f272}">
+    <Declaration><![CDATA[FUNCTION F_ADSLOGERROR : DINT
+(* This function logs communication error messages to the TwinCAT System Log View *)
+VAR_INPUT
+	sPrefix		: STRING(20);(* Debug message prefix string (allows the identification of log message source) *)
+	nErrID		: DWORD; (* Error code *)
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF nErrId = 0 THEN
+	F_ADSLOGERROR := ADSLOGSTR( ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG, CONCAT( sPrefix, ' No error!   %s'),'' );
+ELSIF (  nErrId AND DWORD#16#80000000 ) = 16#80000000 THEN
+	F_ADSLOGERROR := ADSLOGDINT( ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, CONCAT( sPrefix, ' Win32 error: %d' ), DWORD_TO_DINT(SCODE_CODE( nErrId )) );
+ELSIF (nErrId AND 16#00008100) =16#00008100 THEN
+	F_ADSLOGERROR := ADSLOGDINT( ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, CONCAT( sPrefix, ' Internal PLC sample project (user) error: %d' ), DWORD_TO_DINT(nErrId) );
+ELSIF (nErrId AND 16#00008000) =16#00008000 THEN
+	F_ADSLOGERROR := ADSLOGDINT( ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, CONCAT( sPrefix, ' Internal TCP/IP Connection Server error: %d' ), DWORD_TO_DINT(nErrId) );
+ELSE
+	F_ADSLOGERROR := ADSLOGDINT( ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, CONCAT( sPrefix, ' TwinCAT System error: %d' ), DWORD_TO_DINT(nErrId) );
+END_IF]]></ST>
+    </Implementation>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

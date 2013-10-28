@@ -1,0 +1,14 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="ST_ApplicationBinaryData" Id="{0ee3dc26-79c8-4fb4-b15f-4b54931400ad}">
+    <Declaration><![CDATA[TYPE ST_ApplicationBinaryData :(* Example of binary user data structure (4 byte aligned) *)
+STRUCT
+	(* Adapt this structure to match your protocol needs *)
+	dwMethode : DWORD;
+	dwKey : DWORD;
+	dwValue : DWORD;
+	(* total user data size = 120 byte *)
+END_STRUCT
+END_TYPE]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

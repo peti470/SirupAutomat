@@ -1,0 +1,18 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <Itf Name="I_DigitalOut" Id="{8c5a6691-9636-489a-85c3-2c926edf1d80}">
+    <Declaration><![CDATA[INTERFACE I_DigitalOut
+]]></Declaration>
+    <Method Name="M_On" Id="{3a7646a9-3cb5-40c8-8e2b-04cade896a0b}">
+      <Declaration><![CDATA[METHOD M_On
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_Off" Id="{899ffef1-0829-4a26-8138-7293424e86b0}">
+      <Declaration><![CDATA[ METHOD M_Off
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

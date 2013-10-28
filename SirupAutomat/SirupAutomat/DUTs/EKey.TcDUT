@@ -1,0 +1,14 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="EKey" Id="{16403ebe-c991-4fa2-b051-aa268cd94296}">
+    <Declaration><![CDATA[TYPE EKey :
+(
+	KeyCommand := 1,
+	KeyVolume := 2,
+	KeyStationID := 3,
+	KeyStatus := 4
+);
+END_TYPE
+]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

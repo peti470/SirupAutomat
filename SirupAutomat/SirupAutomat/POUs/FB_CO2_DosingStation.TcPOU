@@ -1,0 +1,204 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="FB_CO2_DosingStation" Id="{23878582-664c-4807-9630-75bad9656dcc}">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CO2_DosingStation  IMPLEMENTS I_DosingStation
+VAR_INPUT
+	bPrefill AT %I* : BOOL;
+END_VAR
+VAR_OUTPUT
+	bFinished : BOOL := TRUE;
+END_VAR
+VAR
+	fbT1 : FB_Timer;
+	dosingState : EDosingState := eStopped;
+	fbValve1 : FB_DigitalOut;
+	fbValve2 : FB_DigitalOut;
+END_VAR
+VAR_EXTERNAL
+    // the global enable/disable for the pump and the blow off valve
+    bPump : BOOL;
+    bBlowOff : BOOL;
+END_VAR
+ 
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[;]]></ST>
+    </Implementation>
+    <Method Name="M_Fill" Id="{23d567a7-11f8-4ea6-a905-a2f304083c64}">
+      <Declaration><![CDATA[METHOD M_Fill
+VAR_INPUT
+    tiPumpTime : TIME := TIME#2S;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE dosingState OF
+	eStopped :
+		// wait for start
+   		bFinished := FALSE;
+        // open the 2 valves (the blow off valve is valve 3) to release overpressure of the CO2 bottle
+        bBlowOff := TRUE;
+        fbValve1.M_On();
+        dosingState := eV1AndV3Opened;
+    eV1AndV3Opened :    
+		fbT1.M_Start(TIME#2S);
+		IF fbT1.bTimeout THEN
+            // after a timeout close the blow off valve and open the outlet
+			bBlowOff := FALSE;
+			fbValve2.M_On();
+			dosingState := eV2Opened;
+		END_IF
+	eV2Opened :
+		fbT1.M_Start(TIME#1S);
+		IF fbT1.bTimeout THEN
+			fbValve1.M_On();
+			dosingState := eV1Opened;
+		END_IF
+	eV1Opened :
+		fbT1.M_Start(TIME#1S);
+		IF fbT1.bTimeout THEN
+			bPump := TRUE;
+			dosingState := eP1Started;
+		END_IF
+	eP1Started :
+		fbT1.M_Start(tiPumpTime);
+		IF fbT1.bTimeout THEN
+			bPump := FALSE;
+			dosingState := eP1Stopped;
+		END_IF
+	eP1Stopped :
+		fbT1.M_Start(TIME#1S);
+		IF fbT1.bTimeout THEN
+			fbValve1.M_Off();
+			dosingState := eV1Stopped;
+		END_IF
+	eV1Stopped :
+		fbT1.M_Start(TIME#10S);
+		IF fbT1.bTimeout THEN
+			fbValve2.M_Off();
+			dosingState := eEnd;
+		END_IF
+	eEnd :
+   		bFinished := TRUE;
+		dosingState := eStopped;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Prefill" Id="{cb730290-4876-4d26-8c2e-9d2e0d4f3606}">
+      <Declaration><![CDATA[METHOD M_Prefill
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE dosingState OF
+	eStopped :
+		// wait for start
+		bFinished := FALSE;
+		// open the 2 valves (the blow-off valve an inlet of the bottle) to release overpressure of the CO2 bottle
+		bBlowOff := TRUE;
+		fbValve1.M_On();
+		dosingState := eV1AndV3Opened;
+	eV1AndV3Opened :
+        // let the CO2 blow-off for a short time    
+		fbT1.M_Start(TIME#2S);
+		IF fbT1.bTimeout THEN
+			// after a timeout close the blow-off valve and open the outlet
+            // let the inlet open
+			bBlowOff := FALSE;
+			fbValve2.M_On();
+            // jump directly to the pump, because the inlet ist already open
+			dosingState := eV1Opened;
+		END_IF
+	eV2Opened :
+        // don't wait 
+		fbT1.M_Start(TIME#0S);
+		IF fbT1.bTimeout THEN
+			fbValve1.M_On();
+			dosingState := eV1Opened;
+		END_IF
+	eV1Opened :
+        // don't wait 
+		fbT1.M_Start(TIME#0S);
+		IF fbT1.bTimeout THEN
+			bPump := TRUE;
+			dosingState := eP1Started;
+		END_IF
+	eP1Started :
+		IF NOT bPrefill THEN
+			bPump := FALSE;
+			dosingState := eP1Stopped;
+		END_IF
+	eP1Stopped :
+        // don't wait the Coca Cola pooring out
+        // therefore close inlet and outlet simultaneously
+		fbT1.M_Start(TIME#0S);
+		IF fbT1.bTimeout THEN
+			fbValve1.M_Off();
+			fbValve2.M_Off();
+			dosingState := eEnd;
+		END_IF
+	eV1Stopped :
+		fbT1.M_Start(TIME#5S);
+		IF fbT1.bTimeout THEN
+			fbValve2.M_Off();
+			dosingState := eEnd;
+		END_IF
+	eEnd :
+		bFinished := TRUE;
+		dosingState := eStopped;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Stop" Id="{f8867f78-3bf0-4945-b86c-f40b8f427409}">
+      <Declaration><![CDATA[METHOD M_Stop
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbValve2.M_Off();
+fbValve1.M_Off();
+bPump := FALSE;	
+dosingState := eStopped;
+bFinished := TRUE;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PrepareForNextDrink" Id="{46261b18-bb34-4406-aa61-300d1b55bcc0}">
+      <Declaration><![CDATA[METHOD M_PrepareForNextDrink
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bFinished := TRUE;
+dosingState := eStopped;		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetContent_ml" Id="{4674c3d0-8497-4aa4-88d7-21bdf4af90cc}">
+      <Declaration><![CDATA[METHOD M_GetContent_ml : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	uiStartPressure : UINT;
+	uiActualPressure : UINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[;]]></ST>
+      </Implementation>
+      <ObjectProperties />
+    </Method>
+    <ObjectProperties>﻿<XmlArchive>
+  <Data>
+    <o xml:space="preserve" t="POUImageProperty">
+      <n n="ImageData" />
+      <v n="TransparencyColor">"White"</v>
+      <v n="MakeTransparent">false</v>
+    </o>
+  </Data>
+  <TypeList>
+    <Type n="Boolean">System.Boolean</Type>
+    <Type n="POUImageProperty">{bb741845-1ec5-4be9-bb0d-2cf7058af574}</Type>
+    <Type n="String">System.String</Type>
+  </TypeList>
+</XmlArchive></ObjectProperties>
+  </POU>
+</TcPlcObject>

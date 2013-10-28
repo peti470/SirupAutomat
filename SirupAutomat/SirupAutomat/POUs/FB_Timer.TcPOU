@@ -1,0 +1,94 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="FB_Timer" Id="{5451f130-38ee-4af4-a1aa-f6d135238084}">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Timer
+VAR_INPUT
+	tiTimeout : TIME;
+END_VAR
+VAR_OUTPUT
+	bTimeout : BOOL;
+	iIndex : UINT := 0;
+	toggler : BOOL := FALSE;
+END_VAR
+VAR
+	timer : TON;
+	toggleTimer : TON;
+	countUpTimer : TON;
+	elapsed : TIME;
+	state : ETimerState := created;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[;]]></ST>
+    </Implementation>
+    <Method Name="M_ToggleOutput" Id="{f3cc66f1-fbd6-44a5-8f01-2317c5a07a7d}">
+      <Declaration><![CDATA[METHOD M_ToggleOutput
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[elapsed := toggleTimer.ET;
+CASE state OF 
+	created :
+		//onTimer.PT := TIME#4S;
+		toggleTimer(IN := TRUE, PT := TIME#4S);
+		state := outputLow;
+	outputLow :
+		IF NOT toggleTimer.Q THEN
+			toggleTimer(IN := TRUE, PT := TIME#1S);
+		END_IF
+		IF toggleTimer.Q THEN
+			toggleTimer(IN := FALSE);
+			state := outputHigh;
+			toggler := TRUE;
+		END_IF
+	outputHigh :		
+		IF NOT toggleTimer.Q THEN
+			toggleTimer(IN := TRUE, PT := TIME#1S);
+		END_IF
+		IF toggleTimer.Q THEN
+			toggleTimer(IN := FALSE);
+			state := outputLow;
+			toggler := FALSE;
+		END_IF
+END_CASE	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_CountUp" Id="{545b915f-b161-4fd4-925c-4c09a30eecf4}">
+      <Declaration><![CDATA[METHOD M_CountUp
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT countUpTimer.Q THEN
+	countUpTimer( IN := TRUE, PT := TIME#2S );
+END_IF
+
+IF countUpTimer.Q THEN
+	countUpTimer( IN := FALSE ); 
+	iIndex := iIndex + 1;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Start" Id="{5bece9ef-fa2a-42b3-b31e-f8f3dae67050}">
+      <Declaration><![CDATA[METHOD M_Start
+VAR_INPUT
+	tiTimeout : TIME;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT timer.Q THEN
+	bTimeout := FALSE; 
+	timer( IN := TRUE, PT := tiTimeout );
+END_IF
+
+IF timer.Q THEN
+	timer( IN := FALSE );
+	bTimeout := TRUE; 
+END_IF
+timer();]]></ST>
+      </Implementation>
+    </Method>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

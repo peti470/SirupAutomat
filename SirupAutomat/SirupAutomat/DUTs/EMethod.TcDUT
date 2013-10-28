@@ -1,0 +1,13 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="EMethod" Id="{c5869327-cc50-4716-9d70-f7a091149913}">
+    <Declaration><![CDATA[TYPE EMethod :
+(
+	MethGet := 1,
+	MethPut := 2,
+	MethResponse := 3
+);
+END_TYPE
+]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>

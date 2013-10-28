@@ -1,0 +1,8 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <GVL Name="IOStates" Id="{a607992c-e837-4e2a-8815-9b95651b856d}">
+    <Declaration><![CDATA[VAR_GLOBAL
+	byteInletValves AT %QB1 : BYTE;
+END_VAR]]></Declaration>
+    <ObjectProperties />
+  </GVL>
+</TcPlcObject>

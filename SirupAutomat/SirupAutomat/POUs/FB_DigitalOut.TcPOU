@@ -1,0 +1,31 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="FB_DigitalOut" Id="{3ff8d448-d7cf-462d-8b2e-ff592af894bf}">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_DigitalOut IMPLEMENTS I_DigitalOut
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	bOutput AT %Q* : BOOL := FALSE;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="M_Off" Id="{f480b60d-2691-4e51-8ebe-8e6447390bbb}">
+      <Declaration><![CDATA[METHOD M_Off
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bOutput := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_On" Id="{45b5ab3a-8962-4617-89c5-df4059cd36fa}">
+      <Declaration><![CDATA[METHOD M_On
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bOutput := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

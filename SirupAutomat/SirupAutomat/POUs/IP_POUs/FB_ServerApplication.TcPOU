@@ -1,0 +1,108 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="FB_ServerApplication" Id="{b685ba86-ab14-4812-be8b-cce2223d33df}">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ServerApplication
+(* Sample server application. Adapt this code to match your needs. *)
+VAR_IN_OUT
+	hServer 	: T_HSERVER;(* Server connection handle *)
+END_VAR
+VAR_INPUT
+	bDbg		: BOOL 	:= FALSE;(* TRUE => Enable debug output, FALSE => Disable *)
+	bEnable		: BOOL 	:= TRUE;(* TRUE => Enable connection, FALSE => Disable *)
+END_VAR
+VAR_OUTPUT
+	eState		: E_SocketConnectionState := eSOCKET_DISCONNECTED;(* TCP/IP connection state *)
+END_VAR
+VAR
+	bCaseError : BOOL;
+	fromClient	: ST_ApplicationBinaryData; (* Rx user data *)
+	toClient	: ST_ApplicationBinaryData; (* Tx user data *)
+
+	fbServer		: FB_LocalServer;(* Implements one server->client connection *)
+	tx 			: FB_FrameBinaryFifo; (* Tx fifo *)
+	rx 			: FB_FrameBinaryFifo; (* Rx fifo *)
+	errors		: FB_ProtErrorFifo; (* Error fifo *)
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* ------------------------------------- trigger data exchange ----------------------------------------------------------------------------------------------*)
+fbServer( bDbg := bDbg, hServer := hServer, rx := rx, tx := tx, errors := errors, bEnable := bEnable, eState => eState  );
+
+
+
+(*----------------------------------------------- fetch rx data and send them back to the client ---------------------------------------------------------------------------------------------------- *)
+IF eState = eSOCKET_CONNECTED THEN
+
+	REPEAT
+		rx.A_RemoveHead( pGet := ADR( fromClient ), cbGet := SIZEOF( fromClient ) );(* fetch data from rx fifo *)
+		IF rx.bOk THEN(* success *)
+
+			IF fromClient.dwMethode = MethPut THEN
+				CASE fromClient.dwKey OF
+					KeyCommand:
+						Command  := DWORD_TO_INT(fromClient.dwValue);
+						bCaseError := FALSE;
+					KeyVolume:
+						Volume_ml := DWORD_TO_INT(fromClient.dwValue);
+						bCaseError := FALSE;
+					KeyStationID:
+					    StationID := DWORD_TO_INT(fromClient.dwValue);
+						bCaseError := FALSE;
+				ELSE
+					bCaseError := TRUE;
+				END_CASE
+				// don't leave him with no response
+				toClient.dwMethode := MethResponse;
+				toClient.dwKey := fromClient.dwKey;
+				toClient.dwValue := fromClient.dwValue;
+			ELSIF  fromClient.dwMethode = MethGet THEN
+				CASE fromClient.dwKey OF
+					KeyStatus:
+						toClient.dwMethode := MethResponse;
+						toClient.dwKey := KeyStatus;
+						toClient.dwValue := Status;
+						bCaseError := FALSE;
+				ELSE
+					bCaseError := TRUE;
+				END_CASE
+			END_IF
+		
+			(* send data back to the client *)
+			tx.A_AddTail( pPut := ADR(  toClient ), cbPut := SIZEOF( toClient ) );(* put user data to the tx fifo *)
+			IF NOT tx.bOk THEN(* fifo overflow: log error *)
+				errors.A_AddTail( putError := PLCPRJ_ERROR_SEND_BUFFER_OVERFLOW );
+			END_IF
+
+		END_IF
+	UNTIL NOT rx.bOk
+	END_REPEAT
+
+END_IF
+
+(*-------------------------------------- get error messages from error fifo ----------------------------------------------------------------------------- *)
+REPEAT
+	errors.A_RemoveHead( bDbg := bDbg );
+	IF errors.bOk THEN
+		;(* TODO: Implement error handler *)
+	END_IF
+UNTIL NOT errors.bOk
+END_REPEAT
+
+]]></ST>
+    </Implementation>
+    <ObjectProperties>﻿<XmlArchive>
+  <Data>
+    <o xml:space="preserve" t="POUImageProperty">
+      <n n="ImageData" />
+      <v n="TransparencyColor">"White"</v>
+      <v n="MakeTransparent">false</v>
+    </o>
+  </Data>
+  <TypeList>
+    <Type n="Boolean">System.Boolean</Type>
+    <Type n="POUImageProperty">{bb741845-1ec5-4be9-bb0d-2cf7058af574}</Type>
+    <Type n="String">System.String</Type>
+  </TypeList>
+</XmlArchive></ObjectProperties>
+  </POU>
+</TcPlcObject>

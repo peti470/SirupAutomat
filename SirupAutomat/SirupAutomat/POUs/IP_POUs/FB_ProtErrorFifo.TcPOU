@@ -1,0 +1,53 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <POU Name="FB_ProtErrorFifo" Id="{71ca2569-5ffc-4f6b-b5a2-73e9e101a12c}">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ProtErrorFifo
+(* Protocol error fifo control function block *)
+VAR_INPUT
+	sDesc		: STRING(20)	:= 'Unknown';(* Debug message description string (allows the identification of message source) *)
+	bDbg		: BOOL 		:= FALSE; (* TRUE => Enable debug output, FALSE => Disable *)
+	putError	: UDINT 		:= 0; (* Error code to add (write) to the fifo *)
+END_VAR
+VAR_OUTPUT
+	bOk			: BOOL; 	 	(* TRUE = New entry added or removed succesfully, FALSE = Fifo overflow or fifo empty *)
+	getError	: UDINT		:= 0; (* Error code get/removed (read) from fifo *)
+	nCount		: UDINT		:= 0;	(* Number of fifo entries *)
+END_VAR
+VAR
+	buffer		: ARRAY[-3..20] OF BYTE;(* Internal buffer memory *)
+	fbBuffer 	: FB_MemRingBuffer;(* Basic (lower level) buffer control function block *)
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[;]]></ST>
+    </Implementation>
+    <Action Name="A_AddTail" Id="{a5fca0c1-721f-4505-8df5-b6e38e8be24c}">
+      <Implementation>
+        <ST><![CDATA[(* adds new fifo entry *)
+fbBuffer.A_AddTail( 	pWrite:= ADR( putError ), cbWrite := SIZEOF( putError ),
+					pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
+					bOk=>bOk, nCount=>nCount );
+IF bOk THEN
+	IF bDbg THEN(* log message *)
+		F_ADSLOGERROR( CONCAT( sDesc, '<=' ), putError );
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_RemoveHead" Id="{c55e6056-36d4-4507-86bc-499f6c1560cc}">
+      <Implementation>
+        <ST><![CDATA[(* removes oldest fifo entry *)
+fbBuffer.A_RemoveHead( 	pRead := ADR(getError), cbRead := SIZEOF(getError),
+						pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
+						bOk=>bOk, nCount=>nCount );
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Reset" Id="{0800e078-2f82-4500-9e6e-0786f792bf28}">
+      <Implementation>
+        <ST><![CDATA[(* resets fifo = clears all data *)
+fbBuffer.A_Reset( pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
+				bOk=>bOk, nCount=>nCount );]]></ST>
+      </Implementation>
+    </Action>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>

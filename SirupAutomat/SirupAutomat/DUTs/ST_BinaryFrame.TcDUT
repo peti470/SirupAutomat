@@ -1,0 +1,11 @@
+﻿<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.19">
+  <DUT Name="ST_BinaryFrame" Id="{f7472afb-3000-466c-9edb-ed26a95f14d6}">
+    <Declaration><![CDATA[TYPE ST_BinaryFrame :(* Simple binary TCP/IP frame (4 byte aligned) *)
+STRUCT
+	head	:  ST_BinaryHeader;(* frame header *)
+	data 	: ARRAY[1..PLCPRJ_BUFFER_SIZE] OF BYTE; (* user data of max. length *)
+END_STRUCT
+END_TYPE]]></Declaration>
+    <ObjectProperties />
+  </DUT>
+</TcPlcObject>
